@@ -29,11 +29,15 @@ app.post("/api/register", function (request, response) {
     console.log("received register request" + username + ":" + password);
 
     ziggy.get(username, function (err, body) {
-        if (err || body) {
+        console.log(JSON.stringify(body));
+
+        if (!err || !(err.statusCode == 404)) {
+            console.log(err);
+            console.log(body);
             response.json( false );
             return;
         }
-        console.log(JSON.stringify(body));
+
         ziggy.insert({
             _id: username,
             username: username,
@@ -86,7 +90,7 @@ app.get('/api/tag', function (request, response) {
                         ++cnt;
                     }
                 }
-                ret.push({tagName: tag, tagCount: cnt});
+                ret.push({tagName: tag, tagCount: /*cnt*/ 10 + Math.floor(Math.random() * 11) });
             }
             response.json(ret);
         }
@@ -95,13 +99,42 @@ app.get('/api/tag', function (request, response) {
 
 // setInterval(function() {console.log("hello"); }, 100000);
 
-app.get('/api/:username/sources', function (request, response) {
-    const username = request.params.username;
+app.get('/api/sources', function (request, response) {
+    const username = request.query.userName;
     ziggy.get(username, function (err, body) {
         if (!err && body) {
-            response.json(body);
+            response.json( _.map(body.sources, function (source) {
+                return {
+                    url: source.url,
+                    name: source.name,
+                    logo: source.logo
+                }
+            } ));
         } else {
             response.state(404).send("sth wrong");
+        }
+    });
+});
+
+app.get('/api/blog', function (request, response) {
+    let username = request.params.userName;
+    let tagname = request.params.tagName;
+    ziggy.get(username, function (err, body) {
+        if (err) {
+            response.status(500).send("Internal Error");
+        } else if (!body) {
+            response.state(400).send("")
+        } else {
+            let ret = [];
+            for (let tag of body.tags) {
+                let cnt = 0;
+                for (let article of body.sources.article) {
+                    if (article.tags.includes(tag)) {
+                        ret.push(article);
+                    }
+                }
+            }
+            response.json(ret);
         }
     });
 });
