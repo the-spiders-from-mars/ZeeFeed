@@ -5,8 +5,8 @@
     OpenWhisk python action
 """
 import json
-import nltk
-nltk.download('punkt')
+# import nltk
+# nltk.download('punkt')
 
 from time import strftime
 
@@ -78,12 +78,14 @@ def main(args):
             "name": feed_name,  # plain text
         }
         result.append(source)
+        print(feed_name)
     return result
 
 
 def get_summary(article, url=False, num_sentence=NUM_SUMMARY_SENTENCE):
     """
     get the summary of one article
+    :param num_sentence: number of sentence left for summary
     :param article: html string of the article or the url of the article
     :param url: True is article is an url
     :return: the summary of the article as string
@@ -138,15 +140,16 @@ def get_feed_data(sources):
         feed_name = feed.feed.title
 
         # Entry Element
-        for entry in feed.entries:
+        for entry in feed["entries"]:
             title = entry.title
             link = entry.link
             author = entry.get('author', feed_name)
-            date = strftime('%Y.%m.%d.%H.%M.%S', entry.published_parsed)
+
             content = entry.get('content', None)
-            if content is None:
+            if content is None or not hasattr(entry, "published"):
                 continue
                 # TODO summary_details
+            date = entry.published
             content = content[0]["value"]
             logo = feed_logo
             if hasattr(feed, 'enclosures') and len(feed.enclosures) > 0:
@@ -160,20 +163,17 @@ def get_feed_data(sources):
 
 if __name__ == '__main__':
     url_list = [
+                "https://simpleprogrammer.com/feed/",
                 "https://daringfireball.net/feeds/main",
-                "http://feeds.feedburner.com/techcrunch",
-                "http://feeds.feedburner.com/elise/simplyrecipes",
-                "http://feeds.feedburner.com/boingboing/ibag",
-                "http://feeds.feedburner.com/Mashable",
-                "http://feeds.feedburner.com/readwriteweb",
-                "http://feeds.feedburner.com/JohnBattellesSearchblog",
-                "http://feeds.feedburner.com/43Folders",
-                "http://feeds.feedburner.com/37signals/beMH",
-                "http://feeds.feedburner.com/DumbLittleMan",
-                "http://feeds.feedburner.com/InterestingThingOfTheDay"]
-    source_urls = {
+                "https://www.buzzfeed.com/index.xml",
+                "http://www.rss-specifications.com/blog-feed.xml",
+                "http://www.small-business-software.net/blog-feed.xml",
+                "http://www.notepage.net/feed.xml",
+                "http://www.lifehack.org/feed",
+                ]
+    input_json = {
             "sources": url_list
     }
-    source_data = main(source_urls)
+    source_data = main(input_json)
     with open("data.json", "w") as outfile:
-        json.dump(, indent=2)
+        json.dump(source_data, outfile, indent=2)
