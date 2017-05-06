@@ -1,0 +1,29 @@
+{
+  "name": "zeefeed-server",
+  "version": "1.0.0",
+  "description": "server for zeefeed",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --use-strict server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/the-spiders-from-mars/ZeeFeed.git"
+  },
+  "author": "zeling",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/the-spiders-from-mars/ZeeFeed/issues"
+  },
+  "homepage": "https://github.com/the-spiders-from-mars/ZeeFeed#readme",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "cfenv": "^1.0.x",
+    "cloudant": "^1.7.1",
+    "dotenv": "^4.0.0",
+    "express": "^4.14.1",
+    "feedparser": "2.2.0",
+    "cors": "^2.8.3"
+  }
+}
