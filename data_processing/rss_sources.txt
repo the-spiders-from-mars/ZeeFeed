@@ -10,3 +10,6 @@ url_list = ["http://feeds.feedburner.com/techcrunch",
             "http://feeds.feedburner.com/37signals/beMH",
             "http://feeds.feedburner.com/DumbLittleMan",
             "http://feeds.feedburner.com/InterestingThingOfTheDay"]
+
+
+gfw_friendly_url_list = []
