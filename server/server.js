@@ -5,10 +5,14 @@ const express = require("express");
 const cors = require("cors");
 const cfenv = require("cfenv");
 const bodyParser = require('body-parser');
+const feedParser = require('feedparser');
+const _ = require('underscore');
+const req = require('request');
 
 const app = express();
 
 var ziggy;
+var timer;
 
 app.use(cors());
 
@@ -24,13 +28,14 @@ app.post("/api/register", function (request, response) {
 
     console.log("received register request" + username + ":" + password);
 
-    ziggy.find({ selector: {username: username} }, function (err, body) {
-        if (!err && body.docs.length > 0) {
+    ziggy.get(username, function (err, body) {
+        if (err || body) {
             response.json( false );
             return;
         }
         console.log(JSON.stringify(body));
         ziggy.insert({
+            _id: username,
             username: username,
             password: password,
             tags: [],
@@ -53,9 +58,9 @@ app.get("/api/login", function (request, response) {
 
     console.log("received login request" + username + ":" + password);
 
-    ziggy.find({ selector: {username: username} }, function (err, body) {
+    ziggy.get(username, function (err, body) {
         console.log(JSON.stringify(body));
-        if (!err && body.docs.length > 0 && body.docs[0].password === password) {
+        if (!err && body.password === password) {
             response.json(true);
         } else {
             response.json(false);
@@ -64,19 +69,66 @@ app.get("/api/login", function (request, response) {
 
 });
 
-app.get('/api/:username/source', function (request, response) {
-    const username = request.param('username');
-    ziggy.find({selector: {username: username}}, function (err, body) {
-        if (!err) {
-            response.json(body);
+app.get('/api/tag', function (request, response) {
+    const username = request.params.userName;
+    if (!username) response.status().send("Sorry");
+    ziggy.get(username, function (err, body) {
+        if (err) {
+            response.status(500).send("Internal Error");
+        } else if (!body) {
+            response.state(400).send("")
+        } else {
+            let ret = [];
+            for (let tag of body.tags) {
+                let cnt = 0;
+                for (let article of body.sources.article) {
+                    if (article.tags.includes(tag) && !article.read) {
+                        ++cnt;
+                    }
+                }
+                ret.push({tagName: tag, tagCount: cnt});
+            }
+            response.json(ret);
         }
     });
 });
 
-app.post('/api/:username/source', function (req, res) {
-    const username = request.param('username');
-    const sourceUrl = request.body.url;
+// setInterval(function() {console.log("hello"); }, 100000);
 
+app.get('/api/:username/sources', function (request, response) {
+    const username = request.params.username;
+    ziggy.get(username, function (err, body) {
+        if (!err && body) {
+            response.json(body);
+        } else {
+            response.state(404).send("sth wrong");
+        }
+    });
+});
+
+app.post('/api/:username/sources', function (request, response) {
+    const username = request.params.username;
+    const sourceUrls = request.body.urls;
+    ziggy.get(username, function (err, user) {
+        if (!err && user) {
+            const diff = _.difference(_.pluck(user.sources, 'url'), sourceUrls);
+            req.post('http://'/* fixme */, function (err, res, body) {
+                if (!err && body) {
+                    user.sources += _.object(['url', 'articles', 'logo', 'name'], diff, body.articles, body.articles.logo, body.name);
+                    ziggy.insert(user, function (err, r) {
+                        if (!err) {
+                            console.log(r);
+                            response.json(true);
+                        } else {
+                            response.json(false);
+                        }
+                    });
+                }
+            });
+        } else {
+            response.state(404).send("sth wrong");
+        }
+    });
 });
 
 
