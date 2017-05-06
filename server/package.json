@@ -24,6 +24,7 @@
     "dotenv": "^4.0.0",
     "express": "^4.14.1",
     "feedparser": "2.2.0",
-    "cors": "^2.8.3"
+    "cors": "^2.8.3",
+    "underscore": "^1.8.3"
   }
 }
