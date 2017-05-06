@@ -17,8 +17,6 @@ from sumy.utils import get_stop_words
 from watson_developer_cloud import NaturalLanguageUnderstandingV1
 import watson_developer_cloud.natural_language_understanding.features.v1 as features
 
-from Article import Article
-
 __author__ = "freemso"
 
 LANGUAGE = "english"
@@ -29,14 +27,61 @@ BLUEMIX_USER_PASS = "J5qwraJbMPuA"
 BLUEMIX_VERSION = "2017-02-27"
 
 
+class Article:
+    def __init__(self, title, link, author, date, content, logo,
+                 enclosures=None):
+        self.title = title
+        self.link = link
+        self.author = author
+        self.date = date
+        self.content = content
+        self.logo = logo
+        self.enclosures = enclosures
+
+
 def main(args):
     # parse args to get input
-    sources = args.get("sources", ["https://daringfireball.net/feeds/main"])
-    feed_data_list = get_feed_data(sources)
-    return json.dumps({"name": "freemso"}, indent=2)
+    source_urls = args.get("sources")
+    feed_data_list = get_feed_data(source_urls)
+    print(len(feed_data_list))
+    result = []
+    for feed_name, feed_data in feed_data_list.items():
+        articles = []
+        for item in feed_data[0:2]:
+            content = item.content
+            title = item.title
+            link = item.link
+            author = item.author
+            date = item.date
+            logo = item.logo
+            enclosures = item.enclosures
+            feature_dict = get_features(content)
+            tag_set = set()
+            for concept in feature_dict["concepts"]:
+                tag_set.add(concept["text"])
+            summary = get_summary(content)
+            article = {
+                "content": content,  # a html string
+                "tags": list(tag_set),  # a list of tags(str)
+                "summary": summary,  # a plain text string
+                "title": title,  # a plain text
+                "date": date,  # a string
+                "author": author,  # a string
+                "link": link,  # an url
+                "logo": logo,  # an url
+                "enclosures": enclosures  # not used
+            }
+            articles.append(article)
+        source = {
+            "articles": articles,  # article list
+            "name": feed_name,  # plain text
+        }
+        print(json.dumps(source, indent=2))
+        result.append(source)
+    return result
 
 
-def get_summary(article, url=False):
+def get_summary(article, url=False, num_sentence=NUM_SUMMARY_SENTENCE):
     """
     get the summary of one article
     :param article: html string of the article or the url of the article
@@ -52,8 +97,8 @@ def get_summary(article, url=False):
     summarizer = Summarizer(stemmer)
     summarizer.stop_words = get_stop_words(LANGUAGE)
 
-    summ_sents = summarizer(parser.document, NUM_SUMMARY_SENTENCE)
-    summary = " ".join([s.strip() for s in summ_sents])
+    summ_sents = summarizer(parser.document, num_sentence)
+    summary = " ".join([str(s).strip() for s in summ_sents])
 
     return summary
 
@@ -64,7 +109,7 @@ def get_features(html):
         username=BLUEMIX_USER_NAME,
         password=BLUEMIX_USER_PASS)
 
-    feature_list = natural_language_understanding.analyze(
+    feature_dict = natural_language_understanding.analyze(
         html=html,
         features=[
             features.Concepts(),  # keep
@@ -77,7 +122,7 @@ def get_features(html):
             # features.Relations(),
             # features.Sentiment(document=True)
         ])
-    return feature_list
+    return feature_dict
     # print(json.dumps(features, indent=2))
 
 
@@ -86,23 +131,33 @@ def get_feed_data(sources):
     for source in sources:
         feed = feedparser.parse(source)
         # Feed Element
-        feed_data = []
-        feed_img = feed.feed.get('image', None)
+        feed_data = []  # data is a list of Articles
+        feed_logo = feed.feed.get('image', None)
+        if feed_logo is not None:
+            feed_logo = feed_logo["href"]
         feed_name = feed.feed.title
 
         # Entry Element
-        for entry in feed.entries:
+        for entry in feed.entries[0:10]:
             title = entry.title
             link = entry.link
             author = entry.get('author', feed_name)
-            date = strftime('%Y.%m.%d', entry.published_parsed)
+            date = strftime('%Y.%m.%d.%H.%M.%S', entry.published_parsed)
             content = entry.get('content', None)
-            img = feed_img
+            if content is None:
+                continue
+                # TODO summary_details
+            content = content[0]["value"]
+            logo = feed_logo
             if hasattr(feed, 'enclosures') and len(feed.enclosures) > 0:
-                article = Article(title, link, author, date, content, img,
+                article = Article(title, link, author, date, content, logo,
                                   feed.enclosures)
             else:
-                article = Article(title, link, author, date, content, img)
+                article = Article(title, link, author, date, content, logo)
             feed_data.append(article)
         feed_data_list[feed_name] = feed_data
     return feed_data_list
+
+
+if __name__ == '__main__':
+    main({"sources": ["http://feeds.feedburner.com/techcrunch"]})
