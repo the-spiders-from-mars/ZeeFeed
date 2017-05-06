@@ -6,6 +6,7 @@
 """
 import json
 from time import strftime
+import pdb
 
 import feedparser
 from sumy.nlp.stemmers import Stemmer
@@ -157,7 +158,3 @@ def get_feed_data(sources):
             feed_data.append(article)
         feed_data_list[feed_name] = feed_data
     return feed_data_list
-
-
-if __name__ == '__main__':
-    main({"sources": ["http://feeds.feedburner.com/techcrunch"]})
