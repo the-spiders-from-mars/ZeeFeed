@@ -4,19 +4,19 @@
 """
     OpenWhisk python action
 """
-import json
+import nltk
+nltk.download('punkt')
+
 from time import strftime
-import pdb
 
 import feedparser
+import watson_developer_cloud.natural_language_understanding.features.v1 as features
 from sumy.nlp.stemmers import Stemmer
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.parsers.html import HtmlParser
 from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 from sumy.utils import get_stop_words
-
 from watson_developer_cloud import NaturalLanguageUnderstandingV1
-import watson_developer_cloud.natural_language_understanding.features.v1 as features
 
 __author__ = "freemso"
 
@@ -44,11 +44,10 @@ def main(args):
     # parse args to get input
     source_urls = args.get("sources")
     feed_data_list = get_feed_data(source_urls)
-    print(len(feed_data_list))
     result = []
     for feed_name, feed_data in feed_data_list.items():
         articles = []
-        for item in feed_data[0:2]:
+        for item in feed_data:
             content = item.content
             title = item.title
             link = item.link
@@ -77,7 +76,6 @@ def main(args):
             "articles": articles,  # article list
             "name": feed_name,  # plain text
         }
-        print(json.dumps(source, indent=2))
         result.append(source)
     return result
 
@@ -139,7 +137,7 @@ def get_feed_data(sources):
         feed_name = feed.feed.title
 
         # Entry Element
-        for entry in feed.entries[0:10]:
+        for entry in feed.entries:
             title = entry.title
             link = entry.link
             author = entry.get('author', feed_name)
