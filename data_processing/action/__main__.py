@@ -4,6 +4,7 @@
 """
     OpenWhisk python action
 """
+import json
 import nltk
 nltk.download('punkt')
 
@@ -156,3 +157,23 @@ def get_feed_data(sources):
             feed_data.append(article)
         feed_data_list[feed_name] = feed_data
     return feed_data_list
+
+if __name__ == '__main__':
+    url_list = [
+                "https://daringfireball.net/feeds/main",
+                "http://feeds.feedburner.com/techcrunch",
+                "http://feeds.feedburner.com/elise/simplyrecipes",
+                "http://feeds.feedburner.com/boingboing/ibag",
+                "http://feeds.feedburner.com/Mashable",
+                "http://feeds.feedburner.com/readwriteweb",
+                "http://feeds.feedburner.com/JohnBattellesSearchblog",
+                "http://feeds.feedburner.com/43Folders",
+                "http://feeds.feedburner.com/37signals/beMH",
+                "http://feeds.feedburner.com/DumbLittleMan",
+                "http://feeds.feedburner.com/InterestingThingOfTheDay"]
+    source_urls = {
+            "sources": url_list
+    }
+    source_data = main(source_urls)
+    with open("data.json", "w") as outfile:
+        json.dump(, indent=2)
