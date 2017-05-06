@@ -1,0 +1,12 @@
+https://daringfireball.net/feeds/main
+
+url_list = ["http://feeds.feedburner.com/techcrunch",
+            "http://feeds.feedburner.com/elise/simplyrecipes",
+            "http://feeds.feedburner.com/boingboing/ibag",
+            "http://feeds.feedburner.com/Mashable",
+            "http://feeds.feedburner.com/readwriteweb",
+            "http://feeds.feedburner.com/JohnBattellesSearchblog",
+            "http://feeds.feedburner.com/43Folders",
+            "http://feeds.feedburner.com/37signals/beMH",
+            "http://feeds.feedburner.com/DumbLittleMan",
+            "http://feeds.feedburner.com/InterestingThingOfTheDay"]
