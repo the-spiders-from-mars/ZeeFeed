@@ -1,7 +1,6 @@
 import feedparser
 from time import strftime
 from Article import Article
-from Video import Video
 
 url_list = ["http://feeds.feedburner.com/techcrunch",
             "http://feeds.feedburner.com/elise/simplyrecipes",
@@ -25,21 +24,18 @@ for url in url_list:
 
     # Entry Element
     for entry in feed.entries:
-        if hasattr(feed, 'enclosures') and len(feed.enclosures) > 0:
-            enclosure = feed.enclosures[0]
-            e_type = enclosure["type"]
-            length = enclosure["length"]
-            href = enclosure["href"]
-            video = Video(e_type, length, href)
-            feed_data.append(video)
-        else:
             title = entry.title
             link = entry.link
             author = entry.get('author', feed_name)
             date = strftime('%Y.%m.%d', entry.published_parsed)
             content = entry.get('content', None)
             img = feed_img
-            article = Article(title, link, author, date, content, img)
+            article = None
+            if hasattr(feed, 'enclosures') and len(feed.enclosures) > 0:
+                article = Article(title, link, author, date, content, img,
+                                  feed.enclosures)
+            else:
+                article = Article(title, link, author, date, content, img)
             feed_data.append(article)
     data_list[feed_name] = feed_data
 
