@@ -1,15 +1,8 @@
-https://daringfireball.net/feeds/main
-
-url_list = ["http://feeds.feedburner.com/techcrunch",
-            "http://feeds.feedburner.com/elise/simplyrecipes",
-            "http://feeds.feedburner.com/boingboing/ibag",
-            "http://feeds.feedburner.com/Mashable",
-            "http://feeds.feedburner.com/readwriteweb",
-            "http://feeds.feedburner.com/JohnBattellesSearchblog",
-            "http://feeds.feedburner.com/43Folders",
-            "http://feeds.feedburner.com/37signals/beMH",
-            "http://feeds.feedburner.com/DumbLittleMan",
-            "http://feeds.feedburner.com/InterestingThingOfTheDay"]
-
-
-gfw_friendly_url_list = []
+url_list = ["https://simpleprogrammer.com/feed/",
+            "https://daringfireball.net/feeds/main",
+            "https://www.buzzfeed.com/index.xml",
+            "http://www.rss-specifications.com/blog-feed.xml",
+            "http://www.small-business-software.net/blog-feed.xml",
+            "http://www.notepage.net/feed.xml",
+            "http://www.lifehack.org/feed",
+            ]
