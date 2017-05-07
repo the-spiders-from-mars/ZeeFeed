@@ -8,6 +8,8 @@
 为了解决这个问题，我们提出了解绑订阅源与文章的思路，改革阅读器文章管理范式，引入以用户兴趣为核心的、
 基于标签的文章管理界面，增加 RSS 阅读器的易用性。
 
+client repository 在[这里](https://github.com/the-spiders-from-mars/ZeeFeed_client)
+
 ## 功能
 ZeeFeed 是一个智能化的 RSS 阅读器。
 它支持基本的 RSS 阅读器所具有的全部功能：
